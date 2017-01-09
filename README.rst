@@ -17,7 +17,7 @@ CDAP version 3.5.x or higher.
 
 Building Plugins
 ----------------
-You get started with Mainframe reader plugins by building directly from the latest source code::
+You get started with Oracle Export plugins by building directly from the latest source code::
 
   git clone https://github.com/hydrator/oracle-export-action.git
   cd oracle-export-plugins
