@@ -14,7 +14,7 @@
  * the License.
  */
 
-package co.cask.hydrator.plugin.batch;
+package io.cdap.plugin;
 
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.CommandFactory;
