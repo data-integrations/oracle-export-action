@@ -1,11 +1,14 @@
-=======================
-Oracle Export Plugin
-=======================
+# Oracle Export Plugin
+
+[![cm-available](https://cdap-users.herokuapp.com/assets/cm-available.svg)](https://docs.cask.co/cdap/current/en/integrations/cask-market.html)
+![cdap-action](https://cdap-users.herokuapp.com/assets/cdap-action.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Join CDAP community](https://cdap-users.herokuapp.com/badge.svg?t=wrangler)](https://cdap-users.herokuapp.com?t=1)
 
 Introduction
 ============
 
-Oracle Export plugin is an export plugin for Hydrator that can efficiently export data from Oracle to be used in Hydrator pipelines.  Oracle includes command line tools to export data that can be utilized to perform this task.
+Oracle Export plugin is an action that can efficiently export data from Oracle to be used in CDAP pipelines.  Oracle includes command line tools to export data that can be utilized to perform this task.
 
 
 Getting Started
