@@ -14,7 +14,7 @@
  * the License.
  */
 
-package co.cask.hydrator.plugin.batch;
+package io.cdap.plugin;
 
 /**
  *Exception class to handle SSH authentication exceptions
