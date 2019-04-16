@@ -1,5 +1,5 @@
 /*
- * Copyright © 2016 Cask Data, Inc.
+ * Copyright © 2016-2019 Cask Data, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,9 +14,9 @@
  * the License.
  */
 
-package co.cask.hydrator.plugin.batch;
+package io.cdap.plugin;
 
-import co.cask.cdap.api.common.Bytes;
+import io.cdap.cdap.api.common.Bytes;
 import org.apache.sshd.common.util.ValidateUtils;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
