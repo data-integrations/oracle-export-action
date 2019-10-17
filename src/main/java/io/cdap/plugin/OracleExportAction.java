@@ -27,6 +27,7 @@ import io.cdap.cdap.api.annotation.Macro;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.annotation.Plugin;
 import io.cdap.cdap.api.plugin.PluginConfig;
+import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.cdap.etl.api.PipelineConfigurer;
 import io.cdap.cdap.etl.api.action.Action;
 import io.cdap.cdap.etl.api.action.ActionContext;
@@ -66,11 +67,15 @@ public class OracleExportAction extends Action {
 
   @Override
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) {
-    config.validate();
+    config.validate(pipelineConfigurer.getStageConfigurer().getFailureCollector());
   }
 
   @Override
   public void run(ActionContext context) throws Exception {
+    FailureCollector collector = context.getFailureCollector();
+    config.validate(collector);
+    collector.getOrThrowException();
+
     String oracleExportCommand = buildOracleExportCommand();
     Connection connection = new Connection(config.oracleServerHostname, config.oracleServerSSHPort);
     try {
@@ -187,6 +192,11 @@ public class OracleExportAction extends Action {
    * Config class that contains all properties necessary to execute the SQLPLUs spool command.
    */
   public static class OracleExportActionConfig extends PluginConfig {
+    private static final String ORACLE_SERVER_PORT = "oracleServerPort";
+    private static final String ORACLE_AUTH_MECHANISM = "oracleServerSSHAuthMechanism";
+    private static final String ORACLE_SERVER_PASSWORD = "oracleServerSSHPassword";
+    private static final String ORACLE_PRIVATE_KEY = "oracleServerSSHPrivateKey";
+    private static final String FORMAT = "format";
 
     @Description("Host name of the remote DB machine")
     @Macro
@@ -299,30 +309,36 @@ public class OracleExportAction extends Action {
       this.format = format;
     }
 
-    public void validate() {
-      if (!containsMacro("oracleServerPort") && oracleServerSSHPort  < 0) {
-        throw new IllegalArgumentException("Port cannot be negative");
+    public void validate(FailureCollector collector) {
+      if (!containsMacro(ORACLE_SERVER_PORT) && oracleServerSSHPort < 0) {
+        collector.addFailure(
+          String.format("Port value '%d' is invalid. Oracle port can not be a negative number.",
+                        oracleServerSSHPort), null).withConfigProperty(ORACLE_SERVER_PORT);
       }
 
       if (!("password".equalsIgnoreCase(oracleServerSSHAuthMechanism)
         || "private key".equalsIgnoreCase(oracleServerSSHAuthMechanism))) {
-        throw new IllegalArgumentException(
-          String.format("Invalid authentication mechanism '%s'. Must be one of Private Key or Password",
-                        oracleServerSSHAuthMechanism));
+        collector.addFailure(
+          String.format("Invalid authentication mechanism '%s'.", oracleServerSSHAuthMechanism),
+          "Ensure it is one of Private Key or Password.").withConfigProperty(ORACLE_AUTH_MECHANISM);
       }
 
       if ("password".equalsIgnoreCase(oracleServerSSHAuthMechanism) && Strings.isNullOrEmpty(oracleServerSSHPassword)) {
-        throw new IllegalArgumentException("Password cannot be empty");
+        collector.addFailure(
+          "Password must be provided for auth mechanism 'password'.", null)
+          .withConfigProperty(ORACLE_AUTH_MECHANISM).withConfigProperty(ORACLE_SERVER_PASSWORD);
       } else if ("private key".equalsIgnoreCase(oracleServerSSHAuthMechanism)
         && Strings.isNullOrEmpty(oracleServerSSHPrivateKey)) {
-        throw new IllegalArgumentException("Private Key cannot be empty");
+        collector.addFailure("Private Key must be provided for auth mechanism 'private key'.", null)
+          .withConfigProperty(ORACLE_AUTH_MECHANISM).withConfigProperty(ORACLE_PRIVATE_KEY);
       }
 
       try {
         SeparatorFormat.valueOf(format.toUpperCase());
       } catch (IllegalArgumentException e) {
-        throw new IllegalArgumentException(
-          String.format("Invalid format '%s'. Must be one of %s", format, EnumSet.allOf(SeparatorFormat.class)));
+        collector.addFailure(
+          String.format("Invalid format '%s'.", format),
+          String.format("Supported formats are: %s", EnumSet.allOf(SeparatorFormat.class))).withConfigProperty(FORMAT);
       }
 
       String trimmedQuery = queryToExecute.trim();
